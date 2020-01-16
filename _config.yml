@@ -102,3 +102,11 @@ deploy:
   type: 'git'
   repo: git@github.com:mxsm/mxsm.github.io.git
   branch: master
+
+# sitemap
+sitemap:
+  path: sitemap.xml
+  
+baidusitemap:
+  path: baidusitemap.xml
+  
