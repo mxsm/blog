@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /about/
+Allow: /tags/
+Allow: /categories/
+Allow: /archives/
+
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Disallow: /vendors/
+Disallow: /fancybox/
+
+Sitemap: https://blog.ljbmxsm.com/sitemap.xml
+Sitemap: https://blog.ljbmxsm.com/baidusitemap.xml
