@@ -365,11 +365,25 @@ codeblock:
     style: mac
 
 back2top:
-  enable: true
+  enable: false
   # Back to top in sidebar.
   sidebar: false
   # Scroll percent label in b2t button.
   scrollpercent: false
+
+#hexo-cake-moon-menu 插件配置
+moon_menu:
+  back2top:
+    enable: true
+    icon: fa fa-chevron-up
+    func: back2top
+    order: -1
+  back2bottom:
+    enable: true
+    icon: fa fa-chevron-down
+    func: back2bottom
+    order: -2
+
 
 # Reading progress bar
 reading_progress:
