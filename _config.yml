@@ -160,7 +160,9 @@ algolia:
     - tags
     - title
 
-#search:
-#  path: db.json
-#  field: post
-#  content: true
+### mermaid url https://github.com/knsv/mermaid
+mermaid:
+  enable: true  # default true
+  version: "7.1.2" # default v7.1.2
+  options:  # find more api options from
+    - https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
