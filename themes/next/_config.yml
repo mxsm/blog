@@ -40,8 +40,10 @@ custom_file_path:
 # ---------------------------------------------------------------
 
 favicon:
-  small: /images/favicon-16x16-next.png
-  medium: /images/favicon-32x32-next.png
+  #small: /images/favicon-16x16-next.png
+  small: /images/firefox.png
+  #medium: /images/favicon-32x32-next.png
+  medium: /images/firefox.png
   apple_touch_icon: /images/apple-touch-icon-next.png
   safari_pinned_tab: /images/logo.svg
   #android_manifest: /images/manifest.json
@@ -49,7 +51,7 @@ favicon:
 
 footer:
   # Specify the date when the site was setup. If not defined, current year will be used.
-  #since: 2015
+  since: 2019
 
   # Icon between year and copyright info.
   icon:
@@ -57,7 +59,7 @@ footer:
     # `heart` is recommended with animation in red (#ff0000).
     name: heart
     # If you want to animate the icon, set it to true.
-    animated: false
+    animated: true
     # Change the color of icon, using Hex Code.
     color: "#808080"
 
@@ -349,7 +351,7 @@ android_chrome_color: "#222"
 safari_rainbow: false
 
 # Custom Logo (Do not support scheme Mist)
-custom_logo: #/uploads/custom-logo.jpg
+custom_logo: /images/firefox.svg
 
 codeblock:
   # Code Highlight theme
