@@ -142,3 +142,25 @@ feed:
   icon: icon.png
   autodiscovery: true
   template:
+
+algolia:
+  applicationID: 'JO2SY3WDAC'
+  appId: "JO2SY3WDAC"
+  apiKey: "324ddb3b679c1308e5aa8bf222e07f8b"
+  adminApiKey: "7ccac6f2626159777b7fca3323dab42a"
+  chunkSize: 5000
+  indexName: "mxsm"
+  fields:
+    - content:strip:truncate,0,500
+    - excerpt:strip
+    - gallery
+    - permalink
+    - photos
+    - slug
+    - tags
+    - title
+
+#search:
+#  path: db.json
+#  field: post
+#  content: true
