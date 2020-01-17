@@ -17,6 +17,7 @@
     "hexo-algoliasearch": "^0.4.1",
     "hexo-cake-moon-menu": "^1.1.3",
     "hexo-deployer-git": "^2.1.0",
+    "hexo-filter-flowchart": "^1.0.4",
     "hexo-generator-archive": "^1.0.0",
     "hexo-generator-baidu-sitemap": "^0.1.6",
     "hexo-generator-category": "^1.0.0",
