@@ -103,10 +103,10 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: 'git'
+- type: git
   repo: git@github.com:mxsm/mxsm.github.io.git
   branch: master
-
+- type: baidu_url_submitter
 # sitemap
 sitemap:
   path: sitemap.xml
@@ -166,3 +166,10 @@ mermaid:
   version: "7.1.2" # default v7.1.2
   options:  # find more api options from
     - https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
+
+#百度
+baidu_url_submit:
+  count: 200  #  提交最新的一个链接
+  host: blog.ljbmxsm.com # 在百度站长平台中注册的域名
+  token: nhjIpm7uTxyxERwJ # 请注意这是您的秘钥， 所以请不要把博客源代码发布在公众仓库里!
+  path: baidu_urls.txt # 文本文档的地址， 新链接会保存在此文本文档里
