@@ -4,7 +4,7 @@
 
 # Site
 title: 蚂蚁背大象
-subtitle: 要有遥不可及的梦想<br/>要有脚踏实地的本事
+subtitle: 要有遥不可及的梦想<br/>也要有脚踏实地的本事
 description: ''
 keywords:
 author: 蚂蚁背大象
@@ -62,7 +62,7 @@ highlight:
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
   path: ''
-  per_page: 10
+  per_page: 3
   order_by: -date
 
 # Category & Tag
@@ -174,4 +174,4 @@ baidu_url_submit:
   token: nhjIpm7uTxyxERwJ # 请注意这是您的秘钥， 所以请不要把博客源代码发布在公众仓库里!
   path: baidu_urls.txt # 文本文档的地址， 新链接会保存在此文本文档里
 
-excerpt_length: 300
+#excerpt_length: 300
