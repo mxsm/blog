@@ -41,9 +41,9 @@ custom_file_path:
 
 favicon:
   #small: /images/favicon-16x16-next.png
-  small: /images/firefox.png
+  small: /images/firefox16.ico
   #medium: /images/favicon-32x32-next.png
-  medium: /images/firefox.png
+  medium: /images/firefox32.ico
   apple_touch_icon: /images/apple-touch-icon-next.png
   safari_pinned_tab: /images/logo.svg
   #android_manifest: /images/manifest.json
