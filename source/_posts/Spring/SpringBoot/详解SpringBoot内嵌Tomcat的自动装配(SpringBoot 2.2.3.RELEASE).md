@@ -376,4 +376,197 @@ public TomcatServletWebServerFactoryCustomizer tomcatServletWebServerFactoryCust
 	}
 ```
 
-----还没分析完
+**forwardedHeaderFilter** 创建的处理转发头的过滤器。  
+在 **ServletWebServerFactoryAutoConfiguration** 类中还有一个静态内部类：
+
+```java
+public static class BeanPostProcessorsRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
+
+		private ConfigurableListableBeanFactory beanFactory;
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			if (beanFactory instanceof ConfigurableListableBeanFactory) {
+				this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+			}
+		}
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+			if (this.beanFactory == null) {
+				return;
+			}
+			registerSyntheticBeanIfMissing(registry, "webServerFactoryCustomizerBeanPostProcessor",
+					WebServerFactoryCustomizerBeanPostProcessor.class);
+			registerSyntheticBeanIfMissing(registry, "errorPageRegistrarBeanPostProcessor",
+					ErrorPageRegistrarBeanPostProcessor.class);
+		}
+
+		private void registerSyntheticBeanIfMissing(BeanDefinitionRegistry registry, String name, Class<?> beanClass) {
+			if (ObjectUtils.isEmpty(this.beanFactory.getBeanNamesForType(beanClass, true, false))) {
+				RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
+				beanDefinition.setSynthetic(true);
+				registry.registerBeanDefinition(name, beanDefinition);
+			}
+		}
+
+	}
+```
+在这个静态内部类中往SpringApplication的Context中注入两个Bean的处理器：
+- **WebServerFactoryCustomizerBeanPostProcessor**  
+  WebServerFactoryCustomizer bean的处理
+- **ErrorPageRegistrarBeanPostProcessor**  
+  ErrorPageRegistrar bean处理器
+
+在 **ServletWebServerFactoryAutoConfiguration** 类上面有一个@Import注解导入了四个类：
+
+```
+ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar.class
+ServletWebServerFactoryConfiguration.EmbeddedTomcat.class
+ServletWebServerFactoryConfiguration.EmbeddedJetty.class
+ServletWebServerFactoryConfiguration.EmbeddedUndertow.class
+```
+第一个就是ServletWebServerFactoryAutoConfiguration中的静态类，然后我们研究一下 **EmbeddedTomcat** 中的静态内部类：
+
+```java
+@Configuration(proxyBeanMethods = false)
+class ServletWebServerFactoryConfiguration {
+
+    @Configuration(proxyBeanMethods = false)
+    //存在有Tomcat的类--这个是Apache Tomcat的启动类(内嵌Tomcat)
+	@ConditionalOnClass({ Servlet.class, Tomcat.class, UpgradeProtocol.class })
+	@ConditionalOnMissingBean(value = ServletWebServerFactory.class, search = SearchStrategy.CURRENT)
+	public static class EmbeddedTomcat {
+
+		@Bean
+		public TomcatServletWebServerFactory tomcatServletWebServerFactory(
+				ObjectProvider<TomcatConnectorCustomizer> connectorCustomizers,
+				ObjectProvider<TomcatContextCustomizer> contextCustomizers,
+				ObjectProvider<TomcatProtocolHandlerCustomizer<?>> protocolHandlerCustomizers) {
+			TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+			factory.getTomcatConnectorCustomizers()
+					.addAll(connectorCustomizers.orderedStream().collect(Collectors.toList()));
+			factory.getTomcatContextCustomizers()
+					.addAll(contextCustomizers.orderedStream().collect(Collectors.toList()));
+			factory.getTomcatProtocolHandlerCustomizers()
+					.addAll(protocolHandlerCustomizers.orderedStream().collect(Collectors.toList()));
+			return factory;
+		}
+
+	}
+    
+    //省略其他的代码两个静态内部类
+}
+```
+在这个静态内部类中做了一件事情，那就是创建 **TomcatServletWebServerFactory** 类。在这个类中有一个 **getWebServer** 方法，这个方法在接口 **ServletWebServerFactory#getWebServer** 中。那么看一下这个类的实现：
+
+```
+	@Override
+	public WebServer getWebServer(ServletContextInitializer... initializers) {
+		if (this.disableMBeanRegistry) {
+			Registry.disableRegistry();
+		}
+		Tomcat tomcat = new Tomcat();
+		File baseDir = (this.baseDirectory != null) ? this.baseDirectory : createTempDir("tomcat");
+		tomcat.setBaseDir(baseDir.getAbsolutePath());
+		Connector connector = new Connector(this.protocol);
+		connector.setThrowOnFailure(true);
+		tomcat.getService().addConnector(connector);
+		customizeConnector(connector);
+		tomcat.setConnector(connector);
+		tomcat.getHost().setAutoDeploy(false);
+		configureEngine(tomcat.getEngine());
+		for (Connector additionalConnector : this.additionalTomcatConnectors) {
+			tomcat.getService().addConnector(additionalConnector);
+		}
+		prepareContext(tomcat.getHost(), initializers);
+		return getTomcatWebServer(tomcat);
+	}
+```
+可以看出来这个方法主要是创建内嵌的Tomcat。
+> TomcatServletWebServerFactory#getWebServer中就创建了内嵌的Tomcat。以前的Tomcat都是配置在外面，SpringBoot主要是通过内嵌的Web容器取消了开发过程中配置。
+
+#### SpringBoot Tomcat如何启动
+分析了如何创建内嵌的Tomcat，那么对于SpringBoot是如何启动Tomcat的。对于Tomcat的启动分为两个方面分析：
+1. **TomcatServletWebServerFactory#getWebServer什么时候调用？**
+2. **Tomcat什么时候启动**  
+
+##### Tomcat容器创建
+```flow
+st=>start: 开始
+spRun=>operation: SpringApplication#run
+spCreateApplicationContext=>operation: SpringApplication#createApplicationContext
+spRefreshContextcondition=>operation: SpringApplication#refreshContext
+e=>end: 结束
+
+st->spRun->spCreateApplicationContext->spRefreshContextcondition->e
+
+```
+上面是SpringApplication的主要几个方法。在方法**refreshContext**中主要是刷新上下文:
+
+```
+	protected void refresh(ApplicationContext applicationContext) {
+		Assert.isInstanceOf(AbstractApplicationContext.class, applicationContext);
+		((AbstractApplicationContext) applicationContext).refresh();
+	}
+```
+通过代码发现主要是通过调用 **AbstractApplicationContext#refresh** 方法。这个方法很熟悉，SpringApplication中创建的ApplicationContext主要创建的是 **AnnotationConfigServletWebServerApplicationContext** 。而这个类继承了 **ServletWebServerApplicationContext** 类，当前类重载了 **onRefresh** 方法。那么看一下 **ServletWebServerApplicationContext#onRefresh** 方法代码:
+
+```java
+	@Override
+	protected void onRefresh() {
+		super.onRefresh();
+		try {
+		   //创建WebServer(对于Tomcat的容器创建的是TomcatWebServer)
+			createWebServer();
+		}
+		catch (Throwable ex) {
+			throw new ApplicationContextException("Unable to start web server", ex);
+		}
+	}
+```
+通过调用 **onRefresh** 方法创建了TomcatWebServer。
+在 **AbstractApplicationContext#refresh** 这个方法中最后调用了一个 **finishRefresh** 方法。在 **AbstractApplicationContext#refresh** 方法中的代码：
+
+```java
+	protected void finishRefresh：
+	() {
+		// Clear context-level resource caches (such as ASM metadata from scanning).
+		clearResourceCaches();
+
+		// Initialize lifecycle processor for this context.
+		initLifecycleProcessor();
+
+		// Propagate refresh to lifecycle processor first.
+		getLifecycleProcessor().onRefresh();
+
+		// Publish the final event.
+		publishEvent(new ContextRefreshedEvent(this));
+
+		// Participate in LiveBeansView MBean, if active.
+		LiveBeansView.registerApplicationContext(this);
+	}
+```
+在ServletWebServerApplicationContext重写了方法finishRefresh：
+
+```java
+@Override
+	protected void finishRefresh() {
+	    //调用了父类的完成刷新方法
+		super.finishRefresh();
+		//启动webServer
+		WebServer webServer = startWebServer();
+		if (webServer != null) {
+		    //发布ServletWebServerInitializedEvent事件
+			publishEvent(new ServletWebServerInitializedEvent(webServer, this));
+		}
+	}
+```
+所以这里就启动了Web容器。
+> 通过这里发现创建WebServer是在onRefresh方法中创建了,而启动WebServer是在 finishRefresh中启动。启动过程中还推送了ServletWebServerInitializedEvent事件。
+
+**通过源码发现TomcatServletWebServerFactory#getWebServer是在ServletWebServerApplicationContext#onRefresh方法中调用了createWebServer方法来触发的。**
+
+##### Tomcat什么时候启动
+说到这个Tomcat启动事件，很多人都比较困惑。通过代码分析可以发现在如果把SpringBoot当做一个简单的Spring的应用，从初始化到完成Spring环境的完成。Tomcat是在SpringApplication完成后启动的，然后发布ServletWebServerInitializedEvent事件。
