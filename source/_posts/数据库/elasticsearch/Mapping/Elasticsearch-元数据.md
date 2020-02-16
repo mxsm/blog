@@ -10,6 +10,7 @@ tags:
   - 索引
   - Mapping
   - 元数据
+abbrlink: 3ecb808c
 date: 2020-02-15 19:05:00
 ---
 
