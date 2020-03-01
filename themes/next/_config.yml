@@ -439,7 +439,7 @@ font:
   global:
     external: true
     family: Lato
-    size:
+    size: 10px
 
   # Font settings for site title (.site-title).
   title:
