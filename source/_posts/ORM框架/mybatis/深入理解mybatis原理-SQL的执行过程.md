@@ -336,8 +336,8 @@ public class ApplicationStart {
 
 通过上面的代码以 **`SqlSessionFactory`** 方式创建，主要有两个步骤：
 
-- 解析mybatis的配置文件
-- 执行Mapper中的方法
+- [解析mybatis的配置文件](#解析mybatis的配置文件)
+- [执行Mapper中的方法](#执行Mapper中的方法)
 
 解析从这个两个方面来根据源码来分析整个执行的SQL的过程。
 
@@ -578,3 +578,126 @@ private void mapperElement(XNode parent) throws Exception {
 5. **解析准备Statement**
 
 > 这里通过源码分析可以看出来，在解析mapper xml的时候，如果namespace配置的接口类不存在是不会抛错的。
+
+### 执行Mapper中的方法
+
+首先看一下代码：
+
+```java
+RoleMapper roleMapper = sqlSessionFactory.openSession().getMapper(RoleMapper.class);
+```
+
+先看一下 **`openSession`** 方法：
+
+```java
+  @Override
+  public SqlSession openSession() {
+    return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
+  }
+  private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
+    Transaction tx = null;
+    try {
+      final Environment environment = configuration.getEnvironment();
+      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+      final Executor executor = configuration.newExecutor(tx, execType);
+      return new DefaultSqlSession(configuration, executor, autoCommit);
+    } catch (Exception e) {
+      closeTransaction(tx); // may have fetched a connection so lets call close()
+      throw ExceptionFactory.wrapException("Error opening session.  Cause: " + e, e);
+    } finally {
+      ErrorContext.instance().reset();
+    }
+  }
+```
+
+这个的默认实现 **`DefaultSqlSessionFactory`** 返回的是一个默认的 **`DefaultSqlSession`** 。下面来看一下获取 **`getMapper`** 方法源代码：
+
+```java
+  @Override
+  public <T> T getMapper(Class<T> type) {
+    return configuration.getMapper(type, this);
+  }
+
+```
+
+通过代码发现是调用了 **`Configuration.getMapper`** 方法：
+
+```java
+  public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+    return mapperRegistry.getMapper(type, sqlSession);
+  }
+  public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+    final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
+    if (mapperProxyFactory == null) {
+      throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
+    }
+    try {
+      return mapperProxyFactory.newInstance(sqlSession);
+    } catch (Exception e) {
+      throw new BindingException("Error getting mapper instance. Cause: " + e, e);
+    }
+  }
+```
+
+通过研究代码发现是 **`mapperRegistry`** 变量中根据Mapper的接口类type获取 **`MapperProxyFactory`** 的代理工厂，然后通过  **`MapperProxyFactory#newInstance`**  创建 **Mapper** 接口的代理类。获取Mapper的接口对象来执行SQL可以看出来，这里获取的是代理类。那么这个 **`MapperProxyFactory`** 什么时候创建的添加到 **`mapperRegistry`** 对象中去的。 在前面分析解析mybatis文件的时候有解析mapper配置的时候有这样的一段代码(XMLMapperBuilder#bindMapperForNamespace)：
+
+```java
+  private void bindMapperForNamespace() {
+    String namespace = builderAssistant.getCurrentNamespace();
+    if (namespace != null) {
+      Class<?> boundType = null;
+      try {
+        boundType = Resources.classForName(namespace);
+      } catch (ClassNotFoundException e) {
+        //ignore, bound type is not required
+      }
+      if (boundType != null) {
+        if (!configuration.hasMapper(boundType)) {
+          // Spring may not know the real resource name so we set a flag
+          // to prevent loading again this resource from the mapper interface
+          // look at MapperAnnotationBuilder#loadXmlResource
+          configuration.addLoadedResource("namespace:" + namespace);
+          configuration.addMapper(boundType);
+        }
+      }
+    }
+  }
+```
+
+ 这段代码有这样一段代码： **configuration.addMapper(boundType)** ，下面来看这段代码：
+
+```java
+  public <T> void addMapper(Class<T> type) {
+    mapperRegistry.addMapper(type);
+  }
+```
+
+这里面调用了 **`MapperRegistry#addMapper`** 方法：
+
+```java
+  public <T> void addMapper(Class<T> type) {
+    if (type.isInterface()) {
+      if (hasMapper(type)) {
+        throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
+      }
+      boolean loadCompleted = false;
+      try {
+        //在这里创建了MapperProxyFactory并且添加
+        knownMappers.put(type, new MapperProxyFactory<>(type));
+        // It's important that the type is added before the parser is run
+        // otherwise the binding may automatically be attempted by the
+        // mapper parser. If the type is already known, it won't try.
+        MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+        parser.parse();
+        loadCompleted = true;
+      } finally {
+        if (!loadCompleted) {
+          knownMappers.remove(type);
+        }
+      }
+    }
+  }
+```
+
+通过代理来执行数据库的逻辑。
