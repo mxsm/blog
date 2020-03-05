@@ -1526,4 +1526,7 @@ public class CyclicBarrierTest {
 }
 ```
 
-### 
+
+
+[参考文档]: https://tech.meituan.com/2019/12/05/aqs-theory-and-apply.html
+
