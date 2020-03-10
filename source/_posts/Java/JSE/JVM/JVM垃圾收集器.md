@@ -89,6 +89,17 @@ date: 2019-08-12 17:53:47
 
 上图展示了六种(或者说7种 包括G1)不同的收集器在新生代和老年代的垃圾收集。如果两个收集器之间有连线说明说明可以搭配使用 。·	
 
+> JVM GC的组合
+>
+> | 参数                                    | 年轻代GC                      | 年老代和持久代                                               |
+> | --------------------------------------- | ----------------------------- | ------------------------------------------------------------ |
+> | -XX:+UseSerialGC                        | Serial                        | Serial Old                                                   |
+> | -XX:+UseParallelGC                      | 并行回收GC(Parallel Scavenge) | Parallel Old                                                 |
+> | -XX:+UseConcMarkSweepGC                 | ParNew GC                     | 并发GC 当出现concurrent Mode failure时采用Serial Old         |
+> | -XX:+UseParNewGC                        | ParNew GC                     | Serial Old                                                   |
+> | -XX:+UseParalledlOldGC                  | 并行回收GC(Parallel Scavenge) | Parallel Old                                                 |
+> | -XX:+UseParalledlOldGC -XX:+UseParNewGC | Par New GC                    | Parallel Old 当出现concurrentMode failure 或promotion failed时采用Serial Old |
+
 ### 4. Serial收集器
 
 - **特性：** 这个收集器是一个`单线程`的收集器，但它的“单线程”的意义并不仅仅说明它只会使用一个CPU或一条收集线程去完成垃圾收集工作，更重要的是在它进行垃圾收集时，必须暂停其他所有的工作线程，直到它收集结束。停止其他的线程工作就是我们常说的 **`Stop the world`**
