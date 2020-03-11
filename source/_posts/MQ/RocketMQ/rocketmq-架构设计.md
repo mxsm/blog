@@ -7,8 +7,8 @@ tags:
   - MQ
   - RocketMQ
   - rocketmq-架构设计
-
-date: 2020-03-10
+abbrlink: e3198638
+date: 2020-03-10 00:00:00
 ---
 
 

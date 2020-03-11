@@ -7,8 +7,8 @@ tags:
   - MQ
   - RocketMQ
   - rocketmq-基本概念
-
-date: 2020-03-10
+abbrlink: '1e1296'
+date: 2020-03-10 00:00:00
 ---
 
 
