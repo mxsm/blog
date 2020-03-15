@@ -1,14 +1,15 @@
 ---
-title: rocketmq-NameServer源码解析工作机制
+title: RocketMQ源码解析-NameServer启动
 categories:
   - MQ
   - RocketMQ
+  - NameServer
 tags:
   - MQ
   - RocketMQ
   - NameServer源码解析
   - NameServer工作机制
-abbrlink: 2c1126c8
+abbrlink: ed397a06
 date: 2020-03-11 00:00:00
 ---
 
@@ -363,7 +364,7 @@ key存储的是 clusterName 的名称， value 存储的是 brokerName 的集合
 
 ##### brokerLiveTable
 
-key 存储的是 brokerAddr 信息，value 存储的是 BrokerLiveInfo 信息，BrokerLiveInfo 中存储了 Broker 的实时状态。
+key 存储的是 brokerAddr(IP:port) 信息，value 存储的是 BrokerLiveInfo 信息，BrokerLiveInfo 中存储了 Broker 的实时状态。
 
 ```java
 class BrokerLiveInfo {

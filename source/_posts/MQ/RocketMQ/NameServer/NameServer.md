@@ -3,9 +3,11 @@ title: NameServer
 categories:
   - MQ
   - RocketMQ
+  - NameServer
 tags:
   - MQ
   - RocketMQ
+  - NameServer
 abbrlink: 56826dc9
 date: 2019-12-07 09:18:16
 ---
