@@ -71,7 +71,9 @@ public class CommitLog {
 
 RocketMQ 以如下图所示存储格式将消息顺序写入 CommitLog，除了记录消息本身的属性（消息长度、消息体、Topic 长度、Topic、消息属性长度和消息属性），CommitLog 同时记录了消息所在消费队列的信息（消费队列 ID 和偏移量）。由于存储条目具备不定长的特性，当 CommitLog 剩余空间无法满足消息时，CommitLog 在尾部追加一个 MAGIC CODE 等于 BLANK_MAGIC_CODE 的存储条目作为结束标记，并将消息存储至下一个 CommitLog 文件。
 
-> BLANK_MAGIC_CODE 的作用就是作为标记当前文件存储CommitLog纪录满了，接下来要用下一个文件存储
+> BLANK_MAGIC_CODE 的作用就是作为标记当前文件存储CommitLog纪录满了，接下来要用下一个文件存储。
+>
+> **存储的位置：${user.home}/store/commitlog** 
 
 ![](https://github.com/mxsm/document/blob/master/image/MQ/RocketMQ/CommitLog%E8%AE%B0%E5%BD%95%E6%A0%BC%E5%BC%8F.png?raw=true)
 
@@ -123,3 +125,35 @@ protected static int calMsgLength(int sysFlag, int bodyLength, int topicLength, 
 > ```
 >
 > 因为加入了端口，4个字节来表示端口所以这里用的8和20个字节来表示。
+
+#### 2.2 ConsumeQueue
+
+**`ConsumeQueue`** 在代码中对应的 **ConsumeQueue** 类：
+
+```java
+public class ConsumeQueue {
+    private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
+	//消费队列存储单元大小
+    public static final int CQ_STORE_UNIT_SIZE = 20;
+    private static final InternalLogger LOG_ERROR = InternalLoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
+
+    private final DefaultMessageStore defaultMessageStore;
+
+    private final MappedFileQueue mappedFileQueue;
+    private final String topic;
+    private final int queueId;
+    private final ByteBuffer byteBufferIndex;
+
+    private final String storePath;
+    private final int mappedFileSize;
+    private long maxPhysicOffset = -1;
+    private volatile long minLogicOffset = 0;
+    private ConsumeQueueExt consumeQueueExt = null;
+}
+```
+
+从代码中可以看到 **`CQ_STORE_UNIT_SIZE`** 是一个固定值20，如下图所示。为了实现定长存储，ConsumeQueue 存储了消息 Tag 的 Hash Code，在进行 Broker 端消息过滤时，通过比较 Consumer 订阅 Tag 的 HashCode 和存储条目中的 Tag Hash Code 是否一致来决定是否消费消息。
+
+![](https://github.com/mxsm/document/blob/master/image/MQ/RocketMQ/ConsumeQueue.png?raw=true)
+
+> **存储的位置：${user.home}/store/consumequeue/${topicName}/${queueId}/${fileName}** 
