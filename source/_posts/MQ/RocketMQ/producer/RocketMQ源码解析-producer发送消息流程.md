@@ -9,7 +9,7 @@ tags:
   - RocketMQ
   - producer
   - producer发送消息的流程
-
+abbrlink: 1bebc20
 date: 2020-03-22 21:00:00
 ---
 

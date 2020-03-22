@@ -10,7 +10,7 @@ tags:
   - Broker源码解析
   - 消息存储机制
   - ConsumeQueue
-
+abbrlink: c20b2bf2
 date: 2020-03-22 16:00:00
 ---
 
