@@ -157,3 +157,28 @@ public class ConsumeQueue {
 ![](https://github.com/mxsm/document/blob/master/image/MQ/RocketMQ/ConsumeQueue.png?raw=true)
 
 > **存储的位置：${user.home}/store/consumequeue/${topicName}/${queueId}/${fileName}** 
+>
+> 每一个文件存储30w条数据
+
+#### IndexFile
+
+```java
+public class IndexFile {
+    private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
+    private static int hashSlotSize = 4;
+    private static int indexSize = 20;
+    private static int invalidIndex = 0;
+    private final int hashSlotNum; //500w
+    private final int indexNum; //2000w
+    private final MappedFile mappedFile;
+    private final FileChannel fileChannel;
+    private final MappedByteBuffer mappedByteBuffer;
+    private final IndexHeader indexHeader;
+    //..........
+    }
+```
+
+下面来看一下IndexFile的存储结构：
+
+![](https://github.com/mxsm/document/blob/master/image/MQ/RocketMQ/IndexFile.png?raw=true)
+
