@@ -134,3 +134,142 @@ public class OnewayProducer {
 > - Oneway 单向发送
 
 ### 2 消息发送流程源码解析
+
+DefaultMQProducer.start启动生产者，下面来看一下start的源码解析：
+
+```java
+    @Override
+    public void start() throws MQClientException {
+        this.setProducerGroup(withNamespace(this.producerGroup));
+        //通过启动
+        this.defaultMQProducerImpl.start();
+        if (null != traceDispatcher) {
+            try {
+                traceDispatcher.start(this.getNamesrvAddr(), this.getAccessChannel());
+            } catch (MQClientException e) {
+                log.warn("trace dispatcher start failed ", e);
+            }
+        }
+    }
+```
+下面看一下 **`this.defaultMQProducerImpl.start();`**
+
+```java
+    public void start() throws MQClientException {
+        this.start(true);
+    }
+    
+    public void start(final boolean startFactory) throws MQClientException {
+        
+        switch (this.serviceState) {
+            case CREATE_JUST:
+            
+            //省略部分代码
+        this.mQClientFactory = MQClientManager.getInstance().getOrCreateMQClientInstance(this.defaultMQProducer, rpcHook);
+        
+        if (startFactory) {
+            //启动MQClientInstance
+            mQClientFactory.start();
+        }
+        }    
+    }
+```
+通过代码可以发现MQClientInstance是整个客户端的核心类。下面来看一下start方法：
+
+```java
+public void start() throws MQClientException {
+
+        synchronized (this) {
+            switch (this.serviceState) {
+                case CREATE_JUST:
+                    this.serviceState = ServiceState.START_FAILED;
+                    // 在没有配置NameServer地址，适配地址
+                    if (null == this.clientConfig.getNamesrvAddr()) {
+                        this.mQClientAPIImpl.fetchNameServerAddr();
+                    }
+                    // 启动客户端请求返回的netty 客户端
+                    this.mQClientAPIImpl.start();
+                    // 启动各种计划任务
+                    this.startScheduledTask();
+                    // 启动拉去消息服务
+                    this.pullMessageService.start();
+                    // 启动负载均衡服务
+                    this.rebalanceService.start();
+                    // 启动推送服务
+                    this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
+                    log.info("the client factory [{}] start OK", this.clientId);
+                    this.serviceState = ServiceState.RUNNING;
+                    break;
+                case START_FAILED:
+                    throw new MQClientException("The Factory object[" + this.getClientId() + "] has been created before, and failed.", null);
+                default:
+                    break;
+            }
+        }
+    }
+```
+MQClientInstance.start 主要做下面几件事：
+1. 启动客户端消息处理
+2. 启动定时任务--更新路由信息定时任务，和broker的心跳定时任务，持久化所有的消费offset的定时任务，自适应定时线程池定时任务(减少或者增加线程数)
+3. 拉取消息服务启动
+4. 负载均衡服务启动
+5. 推送消息服务启动
+
+### 消息的发送
+通过上面的发送代码看出来主要是调用send消息，最后是通过实现DefaultMQProducerImpl.sendDefaultImpl：
+
+```java
+TopicPublishInfo topicPublishInfo = this.tryToFindTopicPublishInfo(msg.getTopic());
+```
+首先获取发送消息的Topic的路由信息。根据路由信息发送数据Message
+
+```java
+MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);
+```
+然后选择一个topic对应的一个MessageQueue队列发送。下面来分析 selectOneMessageQueue 来看一下发送过程中的负载均衡。DefaultMQProducerImpl.selectOneMessageQueue
+
+```java
+    public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
+        return this.mqFaultStrategy.selectOneMessageQueue(tpInfo, lastBrokerName);
+    }
+```
+实现选择一个消息队列进行发送有MQFaultStrategy类中的selectOneMessageQueue方法来实现。
+
+```java
+public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
+        if (this.sendLatencyFaultEnable) {
+            try {
+                int index = tpInfo.getSendWhichQueue().getAndIncrement();
+                for (int i = 0; i < tpInfo.getMessageQueueList().size(); i++) {
+                    int pos = Math.abs(index++) % tpInfo.getMessageQueueList().size();
+                    if (pos < 0)
+                        pos = 0;
+                    MessageQueue mq = tpInfo.getMessageQueueList().get(pos);
+                    if (latencyFaultTolerance.isAvailable(mq.getBrokerName())) {
+                        if (null == lastBrokerName || mq.getBrokerName().equals(lastBrokerName))
+                            return mq;
+                    }
+                }
+
+                final String notBestBroker = latencyFaultTolerance.pickOneAtLeast();
+                int writeQueueNums = tpInfo.getQueueIdByBroker(notBestBroker);
+                if (writeQueueNums > 0) {
+                    final MessageQueue mq = tpInfo.selectOneMessageQueue();
+                    if (notBestBroker != null) {
+                        mq.setBrokerName(notBestBroker);
+                        mq.setQueueId(tpInfo.getSendWhichQueue().getAndIncrement() % writeQueueNums);
+                    }
+                    return mq;
+                } else {
+                    latencyFaultTolerance.remove(notBestBroker);
+                }
+            } catch (Exception e) {
+                log.error("Error occurred when selecting message queue", e);
+            }
+
+            return tpInfo.selectOneMessageQueue();
+        }
+
+        return tpInfo.selectOneMessageQueue(lastBrokerName);
+    }
+```
