@@ -19,8 +19,12 @@ date: 2020-03-27 21:00:00
 1. **Push消费--底层通过长轮询来实现(DefaultMQPushConsumer来实现的)**
 2. **Pull消费--(4.7.0中代码已经用Deprecated标记了DefaultMQPullConsumer的实现)**
 
+### 消费者消费模型
 
-### 消费者并发消息数据
+![](https://raw.githubusercontent.com/mxsm/document/master/image/MQ/RocketMQ/Cosume%E6%B6%88%E8%B4%B9%E6%9E%B6%E6%9E%84.png)
+
+
+### 消费者并发消费数据
 
 ```java
 public class Consumer {
