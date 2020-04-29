@@ -118,6 +118,18 @@ if (offset >= 0 && !consumeRequest.getProcessQueue().isDropped()) {
     this.defaultMQPushConsumerImpl.getOffsetStore().updateOffset(consumeRequest.getMessageQueue(), offset, true);
 }
 ```
+上面的代码
+
+```java
+long offset = consumeRequest.getProcessQueue().removeMessage(consumeRequest.getMsgs());
+```
+
+这段代码获取的是 **`msgTreeMap`** 中的第一个。这里就会存在这一的一个问题如图所示：
+
+![](https://github.com/mxsm/document/blob/master/image/MQ/RocketMQ/RocketMQ%E6%B6%88%E8%B4%B9%E5%9B%BE.png?raw=true)
+
+如果是最上面的队列全部消费了那么序列化的就是7后面的消息。而对于第二个那么如果此时消费者停止宕机。那么序列化的就是2后面的而不是7这样重新启动消费。那么就会重新消费7
+
 下面来看一下如何更新消费进度的。从代码可以看出来是通过调用接口 **OffsetStore#updateOffset** 方法来处理，对于集群消费模式OffsetStore的实现类为RemoteBrokerOffsetStore(另一个实现LocalFileOffsetStore)。创建代码在 DefaultMQPushConsumerImpl#start方法中。那么看一下：
 
 ```java
@@ -139,12 +151,13 @@ public void updateOffset(MessageQueue mq, long offset, boolean increaseOnly) {
     }
 }
 ```
-这里就是把数据更新到一个offsetTable中，这个table包含了消息队列和消费进度的对应关系。  
+这里就是把数据更新到一个offsetTable中，这个table包含了消息队列和消费进度的对应关系。
 这里的消费数据保存在客户端消费集群的内存中，这样就会带来一些问题：
+
 - 消费者宕机了怎么处理消费进度
 - 正常情况下如何处理消费进度
 
-上面两个问题的本质归结到一个那就是如何把这些数据持久化，在哪里持久化的问题。如何持久化这个就是说到持久化策略和持久化的时机。持久化的位置这就确定了这些数据加载的位置。接下分析这两个问题。  
+上面两个问题的本质归结到一个那就是如何把这些数据持久化，在哪里持久化的问题。如何持久化这个就是说到持久化策略和持久化的时机。持久化的位置这就确定了这些数据加载的位置。接下分析这两个问题。 
 OffsetStore 接口主要负责持久化，这里分析的集群消费。RemoteBrokerOffsetStore的实现中看一下 persistAll 这个方法(持久化所有的)
 
 ```java
@@ -223,6 +236,3 @@ this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 ```
 通过代码分析可以发现：  **在消费者shutdown的时候会去持久化，然后就在运行过程中每5秒定时去持久化一次消费进度。消费的进度保存在Broker。** 
 
-#### 顺序消费进度管理
-
---明天分析补上
