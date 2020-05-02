@@ -5,6 +5,7 @@ categories:
   - Springframework
   - Spring-core分析
   - Spring源码解析之组件
+  - Environment
 tags:
   - Spring
   - Springframework

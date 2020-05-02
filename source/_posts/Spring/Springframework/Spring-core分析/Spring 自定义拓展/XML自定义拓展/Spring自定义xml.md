@@ -5,6 +5,7 @@ categories:
   - Springframework
   - Spring-core分析
   - Spring 自定义拓展
+  - XML自定义拓展
 tags:
   - Spring
   - Springframework

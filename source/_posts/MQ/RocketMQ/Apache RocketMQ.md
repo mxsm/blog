@@ -39,6 +39,7 @@ date: 2020-04-21 00:14:17
 - [RocketMQ源码解析-consumer消费策略](/pages/e9cd8ffa/)
 - [RocketMQ源码解析-RocketMQ顺序消息的投递与消费](/pages/96edbe8/)
 - [RocketMQ源码解析-RocketMQ消息ACK机制及消费进度管理](/pages/fa30b572/)
+- [RocketMQ源码解析-消费者重复消费](/pages/f3dbd8ae/)
 
 #### Producer
 

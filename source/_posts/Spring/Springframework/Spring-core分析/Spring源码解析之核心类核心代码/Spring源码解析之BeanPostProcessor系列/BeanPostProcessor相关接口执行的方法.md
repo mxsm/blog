@@ -4,7 +4,8 @@ categories:
   - Spring
   - Springframework
   - Spring-core分析
-  - Spring源码解析之核心类
+  - Spring源码解析之核心类核心代码
+  - Spring源码解析之BeanPostProcessor系列
 tags:
   - Spring
   - Springframework
@@ -18,7 +19,7 @@ date: 2019-08-18 18:59:18
 - **DestructionAwareBeanPostProcessor**
 - **MergedBeanDefinitionPostProcessor**
 - **SmartInstantiationAwareBeanPostProcessor**
- 
+
 四个继承接口加上 ***`BeanPostProcessor`*** 一共五个接口。看一下这五个接口的方法：
 
 ```java

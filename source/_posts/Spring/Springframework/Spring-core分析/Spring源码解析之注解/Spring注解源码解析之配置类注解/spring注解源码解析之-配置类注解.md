@@ -5,6 +5,7 @@ categories:
   - Springframework
   - Spring-core分析
   - Spring源码解析之注解
+  - Spring注解源码解析之配置类注解
 tags:
   - Spring
   - Springframework
@@ -123,7 +124,7 @@ public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
 通过源码分析可以发现配置Class分为两类：  
 
 - **full configurationClass**
- 
+
   Spring中称为full configurationClass,这个是由注解@Configuration注解修饰的。
 - **lite configurationClass**
   
@@ -223,7 +224,7 @@ public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 
    ConfigurationClassParser#parse是一个空壳方法，当中调用了一个 ConfigurationClassParser#processConfigurationClass方法
 - **DeferredImportSelector接口的处理**
- 
+
 下面来分析一下 **ConfigurationClassParser#processConfigurationClass** 方法：
 
 ```java

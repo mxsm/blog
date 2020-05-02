@@ -5,6 +5,7 @@ categories:
   - Springframework
   - Spring-core分析
   - Spring源码解析之注解
+  - Spring注解源码解析之配置类注解
 tags:
   - Spring
   - Springframework

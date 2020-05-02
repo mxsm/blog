@@ -4,12 +4,13 @@ categories:
   - Spring
   - Springframework
   - Spring-core分析
-  - Spring5.x源码解析
+  - Spring源码解析之核心类核心代码
+  - Spring源码解析之懒加载
 tags:
   - Spring
   - Springframework
   - Spring-core分析
-  - Spring5.x源码解析
+  - Spring源码解析之懒加载
 abbrlink: 8f2e07a1
 date: 2018-04-19 21:24:37
 ---

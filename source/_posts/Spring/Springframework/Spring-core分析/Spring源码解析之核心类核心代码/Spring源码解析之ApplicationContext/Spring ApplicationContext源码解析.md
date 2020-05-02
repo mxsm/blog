@@ -4,7 +4,8 @@ categories:
   - Spring
   - Springframework
   - Spring-core分析
-  - Spring源码解析之Application
+  - Spring源码解析之核心类核心代码
+  - Spring源码解析之ApplicationContext
 tags:
   - Spring
   - Springframework
