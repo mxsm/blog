@@ -166,6 +166,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 }
 ```
 
+看一下上面代码的流程图解：
+
+![](https://github.com/mxsm/document/blob/master/image/Spring/Springframework/AbstractApplicationContextReflash%E8%87%AA%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%9B%BE.png?raw=true)
+
 上面代码省略了其他方法。接下来一个个来解析方法：
 
 - **`prepareRefresh()`** 
@@ -269,17 +273,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
          		loadBeanDefinitions(beanDefinitionReader);
          	}
         ```
-     ```
-       
-       
-     ```
-
+     
   2. **getBeanFactory --- 抽象方法由子类(AbstractRefreshableApplicationContext)实现**
-
+  
      ```java
-     @Override
+   @Override
      	public final ConfigurableListableBeanFactory getBeanFactory() {
-     		synchronized (this.beanFactoryMonitor) {
+   		synchronized (this.beanFactoryMonitor) {
      			if (this.beanFactory == null) {
      				throw new IllegalStateException("BeanFactory not initialized or already closed - " +
      						"call 'refresh' before accessing beans via the ApplicationContext");
@@ -290,7 +290,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      ```
      
      
-
+  
 - **`prepareBeanFactory(beanFactory)`**
 
   主要对bean Factory 进行设置

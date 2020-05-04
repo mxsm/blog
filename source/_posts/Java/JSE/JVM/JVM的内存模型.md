@@ -69,3 +69,52 @@ date: 2018-11-04 23:38:42
 
   JDK8用 **MetaSpace** 代替了 **永久代**
 
+### 2. JVM具体分析
+
+![](https://github.com/mxsm/document/blob/master/image/JSE/JVM.png?raw=true)
+
+通过字节码来分析栈帧，首先看一下源码创建
+
+![](https://github.com/mxsm/document/blob/master/image/JSE/bytes.gif?raw=true)
+
+这里演示了如何获取字节码的。
+
+```java
+Compiled from "Math.java"
+public class com.github.mxsm.Math {
+  public static final int CONST;
+
+  public com.github.mxsm.Math();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: return
+
+  public int compute();
+    Code:
+       0: iconst_1
+       1: istore_1
+       2: iconst_2
+       3: istore_2
+       4: iload_1
+       5: iload_2
+       6: iadd
+       7: bipush        10
+       9: imul
+      10: istore_3
+      11: iload_3
+      12: ireturn
+
+  public static void main(java.lang.String[]);
+    Code:
+       0: new           #2                  // class com/github/mxsm/Math
+       3: dup
+       4: invokespecial #3                  // Method "<init>":()V
+       7: astore_1
+       8: aload_1
+       9: invokevirtual #4                  // Method compute:()I
+      12: pop
+      13: return
+}
+```
+

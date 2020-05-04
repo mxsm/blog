@@ -42,7 +42,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 -  **BeanDefinitionRegistry**  
 
-  这个借口主要用来注册Bean的定义到Spring容器的上下文中，把Java类抽象为 ***`BeanDefinition`*** 
+  这个接口主要用来注册Bean的定义到Spring容器的上下文中，把Java类抽象为 ***`BeanDefinition`*** 
 
 -  **SingletonBeanRegistry** 
 
