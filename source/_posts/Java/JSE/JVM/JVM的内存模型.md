@@ -118,3 +118,4 @@ public class com.github.mxsm.Math {
 }
 ```
 
+> 命令对照表：[https://xfl03.gitee.io/coremodtutor/%E9%99%84%E5%BD%95B.html](https://xfl03.gitee.io/coremodtutor/附录B.html) 
