@@ -1,6 +1,7 @@
 ---
 title: Git常用命令-Tag
 categories:
+  - 开发工具
   - git
 tags:
   - git

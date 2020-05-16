@@ -1,6 +1,7 @@
 ---
 title: Git版本回退
 categories:
+  - 开发工具
   - git
 tags:
   - git
