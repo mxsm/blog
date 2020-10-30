@@ -39,11 +39,7 @@ date: 2019-12-07 09:18:16
 - Broker 状态信息 。NameServer 每次收到心跳包时会替换该信息 
 - Broker上的 FilterServer列表，用于类模式消息过滤
 
-```
-RocketMQ 基于订阅发布机制 ， 一个Topic拥有多个消息队列 ，一个Broker为每一主题默认创建 4 个读队列 4 个写队
-列。多个Broker组成一个集群， BrokerName由相同的多台Broker组成Master-Slave架构。brokerId 为0代表 Master， 大于0表示Slave。 BrokerLivelnfo中的lastUpdateTimestamp 存储上次收到 Broker 心跳包的时间
-
-```
+> RocketMQ 基于订阅发布机制 ， 一个Topic拥有多个消息队列 ，一个Broker为每一主题默认创建 4 个读队列 4 个写队列。多个Broker组成一个集群， BrokerName由相同的多台Broker组成Master-Slave架构。brokerId 为0代表 Master， 大于0表示Slave。 BrokerLivelnfo中的lastUpdateTimestamp 存储上次收到 Broker 心跳包的时间
 
 #### 2.2 路由注册
 
@@ -66,11 +62,8 @@ RocketMQ 基于订阅发布机制 ， 一个Topic拥有多个消息队列 ，一
   - 更新 BrokerLivelnfo，存活 Broker信息表， BrokeLivelnfo是执行路由删除的重要依据 
   - 注册 Broker 的过滤器 Server地址列表 ，一个 Broker上会关联多个 FilterServer消息过滤服务器
 
-```
-NameServer和Broker保持长连接，Broker状态存储在brokerLiveTable中，NameServer收到每一个心跳包将更新
-brokerLiveTable中关于Broker的状态信息以及路由表(topicQueueTable、brokerAddrTable、
-brokerLiveTable、filterServerTable)
-```
+> NameServer和Broker保持长连接，Broker状态存储在brokerLiveTable中，NameServer收到每一个心跳包将更新brokerLiveTable中关于Broker的状态信息以及路由表(topicQueueTable、brokerAddrTable、
+> brokerLiveTable、filterServerTable)
 
 #### 2.3 路由删除
 
