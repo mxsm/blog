@@ -13,7 +13,7 @@ date: 2020-11-21 20:18:41
 
 ### 1 Spring Cloud Gateway简介
 
-SpringCloud Gateway 是 Spring Cloud 的一个全新项目，该项目是基于 Spring 5.0，Spring Boot 2.0 和 Project Reactor 等技术开发的网关，它旨在为微服务架构提供一种简单有效的统一的 API 路由管理方式。主要目标是替代 Zuul。Netflix对Zuul停止了维护和更新。所以在Spring Boot2.0没办法集成。Spring Cloud Gateway旨在提供一种简单而有效的方法来路由到API，并为它们提供跨领域的关注，例如：安全性，监视/指标和弹性。
+SpringCloud Gateway 是 Spring Cloud 的一个全新项目，该项目是基于 Spring 5.0，Spring Boot 2.0 和 Project Reactor 等技术开发的网关，它旨在为微服务架构提供一种简单有效的统一的 API 路由管理方式。主要目标是替代 Zuul。Netflix对Zuul停止了维护和更新。所以在Spring Boot2.0没办法集成。Spring Cloud Gateway旨在提供一种简单而有效的方法来路由到API，并为它们提供跨领域的关注，例如：安全性，监视/指标和弹性。 
 
 ### 2 Spring Cloud Gateway特点
 
