@@ -15,7 +15,7 @@ date: 2018-12-17 14:25:36
 
 - **Boss NioEventLoopGroup** 
 
-  这个Boss Group主要是用来监听和轮询Accept请求，然后处理Accept请求处理简历Channel通道，并且将Channel注册到Worker Group
+  这个Boss Group主要是用来监听和轮询Accept请求，然后处理Accept请求处理建立Channel通道，并且将Channel注册到Worker Group
 
 - **Worker NioEventLoopGroup**
 
